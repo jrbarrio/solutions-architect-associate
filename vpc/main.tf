@@ -15,6 +15,7 @@ resource "aws_vpc" "vpc" {
   cidr_block = "10.0.0.0/16"
 
   tags = {
+    Name = "main vpc"
     Project = "solutions-architect-associate-vpc"
   }
 }
@@ -26,6 +27,7 @@ resource "aws_subnet" "public_subnet" {
   map_public_ip_on_launch = true
 
   tags = {
+    Name = "public subnet"
     Project = "solutions-architect-associate-vpc"
   }
 }
@@ -36,6 +38,7 @@ resource "aws_subnet" "private_subnet" {
   availability_zone = "eu-west-1b"
 
   tags = {
+    Name = "private subnet"
     Project = "solutions-architect-associate-vpc"
   }
 }
@@ -82,6 +85,13 @@ resource "aws_security_group" "web_dmz" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 

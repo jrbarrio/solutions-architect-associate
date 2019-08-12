@@ -1,14 +1,13 @@
 terraform {
   backend "s3" {
     region = "eu-west-1"
-    bucket = "jorgeroldanbarrio.terraform.state"
+    bucket = "jrb.2019.terraform.state"
     key = "solutions-architect-associate-vpc/terraform.tfstate"
   }
 }
 
 provider "aws" {
   region = var.region
-  profile = var.profile
 }
 
 resource "aws_vpc" "vpc" {
@@ -138,11 +137,64 @@ resource "aws_instance" "web_server" {
   }
 }
 
-resource "aws_instance" "private_instance" {
+resource "aws_security_group" "db_sg" {
+  name        = "db_sg"
+  description = "Allow ICMP echo, HTTP, HTTPS, MySQL and SSH inbound traffic"
+  vpc_id      = aws_vpc.vpc.id
+
+  ingress {
+    from_port   = 8
+    to_port     = 0
+    protocol    = "icmp"
+    cidr_blocks = ["10.0.1.0/24"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.0/24"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.0/24"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.0/24"]
+  }
+
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.0/24"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Project = "solutions-architect-associate-vpc"
+  }
+}
+
+resource "aws_instance" "db_instance" {
   ami = data.aws_ami.amazon_linux.id
   instance_type = "t2.micro"
 
   subnet_id = aws_subnet.private_subnet.id
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
 
   key_name = aws_key_pair.deployer.key_name
 

@@ -120,7 +120,7 @@ data "aws_ami" "amazon_linux" {
 
 resource "aws_key_pair" "deployer" {
   key_name = "deployer-key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC+gSeWRykbPXrHp2GsTFtNsX5FdSKl6pyQ8WqbaBhHgshndMS9KKwP0SsYLJX4o9KagyhxQx9pdkFZYAgGfmGwrEv1U4sThGU0WD609XjASkT+uQ1Kft5EANDcppOQAiDIWttxVSX1BqOmp9vOM0QPmdgrXa32m2CC0HqSMBGO6TbaW7yF8o9+wJHOE4klnbLT3/UOajaTpvQoLpEiaYbHbuCIBX8McsfzgJLsSjKHmKoxRN8wHjLMT528iUbh67J97HrIlGJRTOWCk+FehroGRZo8y+749GaXfYnS/ZC2X58zj6EZ0qQsSkmHUVRcnZzp0/OSee50jviAWxlOr8Rg/xz0Ymbx+QyifYoIRnZwLkYoQNUKE3Gippfu+Z7QYp5CvufzcQLitT/ZGY+eyF1k0HD5L+6oF0nUvDeCSKNATZS1WaIXL008u4aiGXiWQG9F8CdAw9ZyNQi/LT88Qbhy3UoNNJrNxYQ1jrMq/vqjOpMFPbVqJfvCHDX8lXXrOHmQqlb3dxkgdoOxXgivP45aD21Bs1GIjgyKJEZ7b2iPaKZsNQfpTqnqsHnSxzW6PFc3IVWYJwU4pOQttlb16wUsM8ArURYCwC9zcN8mVoJWIbCucyYcJYxqocC1lfoRoYuPMAnDPskfKs1HiGAq+JlmsnWw6aDxfsYW6MmAx8AB1Q== jorge.roldan@gmail.com"
+  public_key = var.public_key
 }
 
 resource "aws_instance" "web_server" {

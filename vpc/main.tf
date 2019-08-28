@@ -69,29 +69,32 @@ resource "aws_route_table_association" "public_subnet_association" {
 }
 
 resource "aws_security_group" "web_dmz" {
-  name        = "web_dmz"
+  name = "web_dmz"
   description = "Allow SSH inbound traffic"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = [
+      "0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = [
+      "0.0.0.0/0"]
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = [
+      "0.0.0.0/0"]
   }
 
   tags = {
@@ -128,7 +131,8 @@ resource "aws_instance" "web_server" {
   instance_type = "t2.micro"
 
   subnet_id = aws_subnet.public_subnet.id
-  vpc_security_group_ids = [aws_security_group.web_dmz.id]
+  vpc_security_group_ids = [
+    aws_security_group.web_dmz.id]
 
   key_name = aws_key_pair.deployer.key_name
 
@@ -138,50 +142,56 @@ resource "aws_instance" "web_server" {
 }
 
 resource "aws_security_group" "db_sg" {
-  name        = "db_sg"
+  name = "db_sg"
   description = "Allow ICMP echo, HTTP, HTTPS, MySQL and SSH inbound traffic"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   ingress {
-    from_port   = 8
-    to_port     = 0
-    protocol    = "icmp"
-    cidr_blocks = ["10.0.1.0/24"]
+    from_port = 8
+    to_port = 0
+    protocol = "icmp"
+    cidr_blocks = [
+      "10.0.1.0/24"]
   }
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24"]
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = [
+      "10.0.1.0/24"]
   }
 
   ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24"]
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = [
+      "10.0.1.0/24"]
   }
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24"]
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = [
+      "10.0.1.0/24"]
   }
 
   ingress {
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24"]
+    from_port = 3306
+    to_port = 3306
+    protocol = "tcp"
+    cidr_blocks = [
+      "10.0.1.0/24"]
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = [
+      "0.0.0.0/0"]
   }
 
   tags = {
@@ -194,7 +204,8 @@ resource "aws_instance" "db_instance" {
   instance_type = "t2.micro"
 
   subnet_id = aws_subnet.private_subnet.id
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  vpc_security_group_ids = [
+    aws_security_group.db_sg.id]
 
   key_name = aws_key_pair.deployer.key_name
 
@@ -204,16 +215,90 @@ resource "aws_instance" "db_instance" {
 }
 
 resource "aws_eip" "nat_gateway_eip" {
-  vpc      = true
+  vpc = true
 }
 
 resource "aws_nat_gateway" "gw" {
   allocation_id = aws_eip.nat_gateway_eip.id
-  subnet_id     = aws_subnet.public_subnet.id
+  subnet_id = aws_subnet.public_subnet.id
 }
 
 resource "aws_route" "r" {
-  route_table_id            = aws_vpc.vpc.default_route_table_id
-  destination_cidr_block    = "0.0.0.0/0"
-  gateway_id = aws_nat_gateway.gw.id
+  route_table_id = aws_vpc.vpc.default_route_table_id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.gw.id
+}
+
+resource "aws_network_acl" "web_acl" {
+  vpc_id = aws_vpc.vpc.id
+  subnet_ids = [
+    aws_subnet.public_subnet.id]
+
+  ingress {
+    protocol = "tcp"
+    rule_no = 100
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 80
+    to_port = 80
+  }
+
+  ingress {
+    protocol = "tcp"
+    rule_no = 200
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 443
+    to_port = 443
+  }
+
+  ingress {
+    protocol = "tcp"
+    rule_no = 300
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 22
+    to_port = 22
+  }
+
+  egress {
+    protocol = "tcp"
+    rule_no = 100
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 80
+    to_port = 80
+  }
+
+  egress {
+    protocol = "tcp"
+    rule_no = 200
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 443
+    to_port = 443
+  }
+
+  egress {
+    protocol = "tcp"
+    rule_no = 300
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 22
+    to_port = 22
+  }
+
+  egress {
+    protocol = "tcp"
+    rule_no = 400
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 1024
+    to_port = 65535
+  }
+
+  tags = {
+    Project = "solutions-architect-associate-vpc"
+    Name = "web_acl"
+  }
 }

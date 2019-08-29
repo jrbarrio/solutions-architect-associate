@@ -199,21 +199,6 @@ resource "aws_security_group" "db_sg" {
   }
 }
 
-resource "aws_instance" "db_instance" {
-  ami = data.aws_ami.amazon_linux.id
-  instance_type = "t2.micro"
-
-  subnet_id = aws_subnet.private_subnet.id
-  vpc_security_group_ids = [
-    aws_security_group.db_sg.id]
-
-  key_name = aws_key_pair.deployer.key_name
-
-  tags = {
-    Project = "solutions-architect-associate-vpc"
-  }
-}
-
 resource "aws_eip" "nat_gateway_eip" {
   vpc = true
 }
@@ -261,6 +246,15 @@ resource "aws_network_acl" "web_acl" {
     to_port = 22
   }
 
+  ingress {
+    protocol = "tcp"
+    rule_no = 400
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 1024
+    to_port = 65535
+  }
+
   egress {
     protocol = "tcp"
     rule_no = 100
@@ -301,4 +295,64 @@ resource "aws_network_acl" "web_acl" {
     Project = "solutions-architect-associate-vpc"
     Name = "web_acl"
   }
+}
+
+data "aws_iam_policy" "AmazonS3FullAccess" {
+  arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
+resource "aws_iam_role" "s3_access" {
+  name = "s3_access"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+
+  tags = {
+    Project = "solutions-architect-associate-vpc"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "s3_access_attach" {
+  role = aws_iam_role.s3_access.name
+  policy_arn = data.aws_iam_policy.AmazonS3FullAccess.arn
+}
+
+resource "aws_iam_instance_profile" "s3_access_profile" {
+  name = "s3_access"
+  role = aws_iam_role.s3_access.name
+}
+
+resource "aws_instance" "db_instance" {
+  ami = data.aws_ami.amazon_linux.id
+  instance_type = "t2.micro"
+  iam_instance_profile = aws_iam_instance_profile.s3_access_profile.name
+
+  subnet_id = aws_subnet.private_subnet.id
+  vpc_security_group_ids = [
+    aws_security_group.db_sg.id]
+
+  key_name = aws_key_pair.deployer.key_name
+
+  tags = {
+    Project = "solutions-architect-associate-vpc"
+  }
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id = aws_vpc.vpc.id
+  service_name = "com.amazonaws.eu-west-1.s3"
+  route_table_ids = [aws_vpc.vpc.default_route_table_id]
 }

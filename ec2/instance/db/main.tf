@@ -1,22 +1,3 @@
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-
-  filter {
-    name = "name"
-    values = [
-      "amzn2-ami-hvm-2.0.????????-x86_64-gp2"]
-  }
-
-  filter {
-    name = "virtualization-type"
-    values = [
-      "hvm"]
-  }
-
-  owners = [
-    "137112412989"]
-}
-
 data "aws_iam_policy" "AmazonS3FullAccess" {
   arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
@@ -54,7 +35,7 @@ resource "aws_iam_instance_profile" "s3_access_profile" {
 }
 
 resource "aws_instance" "db" {
-  ami = data.aws_ami.amazon_linux.id
+  ami = "ami-0bbc25e23a7640b9b"
   instance_type = "t2.micro"
   iam_instance_profile = aws_iam_instance_profile.s3_access_profile.name
 

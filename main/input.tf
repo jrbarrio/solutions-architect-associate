@@ -6,3 +6,10 @@ variable "region" {
 variable "public_key" {
   type    = string
 }
+
+variable "tags" {
+  type = "map"
+  default = {
+    Project = "solutions-architect-associate-vpc"
+  }
+}

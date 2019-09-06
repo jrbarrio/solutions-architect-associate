@@ -1,7 +1,6 @@
 resource "aws_network_acl" "web_acl" {
   vpc_id = var.vpc_id
-  subnet_ids = [
-    var.subnet_id]
+  subnet_ids = var.subnet_ids
 
   ingress {
     protocol = "tcp"

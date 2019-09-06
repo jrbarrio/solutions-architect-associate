@@ -1,5 +1,5 @@
 module "private_subnet" {
-  source = "../subnet/"
+  source = "../subnet"
 
   vpc_id = var.vpc_id
   cidr_block = "10.0.2.0/24"

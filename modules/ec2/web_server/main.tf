@@ -1,3 +1,7 @@
+data "template_file" "user_data" {
+  template = file("${path.module}/user_data.sh")
+}
+
 resource "aws_launch_configuration" "web_server" {
   image_id = "ami-0bbc25e23a7640b9b"
   instance_type = "t2.micro"
@@ -5,15 +9,7 @@ resource "aws_launch_configuration" "web_server" {
   security_groups = [
     var.vpc_security_group_id]
 
-  user_data = <<-EOF
-    #!/bin/bash
-    yum update -y
-    yum install httpd -y
-    service httpd start
-    chkconfig httpd on
-    cd /var/www/html
-    echo "<html><h1>Hello Jorge!</h1></html>" > index.html
-    EOF
+  user_data = data.template_file.user_data.rendered
 
   lifecycle {
     create_before_destroy = true

@@ -1,5 +1,5 @@
-output "id" {
-  value = module.private_subnet.id
+output "ids" {
+  value = aws_subnet.private_subnets.*.id
 }
 
 output "db_sg_id" {

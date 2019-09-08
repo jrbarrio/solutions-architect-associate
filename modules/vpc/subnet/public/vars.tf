@@ -9,3 +9,7 @@ variable "tags" {
 variable "internet_gateway_id" {
   type = string
 }
+
+variable "key_name" {
+  type    = string
+}

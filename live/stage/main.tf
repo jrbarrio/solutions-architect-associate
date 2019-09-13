@@ -16,7 +16,7 @@ resource "aws_key_pair" "deployer" {
 }
 
 module "vpc" {
-  source = "../modules/vpc/vpc"
+  source = "../../modules/vpc/vpc"
 
   region = var.region
   key_name = aws_key_pair.deployer.key_name
@@ -25,8 +25,9 @@ module "vpc" {
 }
 
 module "web_server" {
-  source = "../modules/ec2/web_server"
+  source = "../../modules/ec2/web_server"
 
+  vpc_id = module.vpc.id
   subnet_ids = module.vpc.public_subnet_ids
   private_subnet_ids = module.vpc.private_subnet_ids
   vpc_security_group_id = module.vpc.web_dmz_sg_id

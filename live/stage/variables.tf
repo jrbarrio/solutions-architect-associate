@@ -3,8 +3,9 @@ variable "region" {
   default = "eu-west-1"
 }
 
-variable "public_key" {
+variable "public_key_name" {
   type    = string
+  default = "deployer-key"
 }
 
 variable "tags" {

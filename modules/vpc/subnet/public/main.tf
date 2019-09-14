@@ -41,7 +41,7 @@ module "web_acl" {
   source = "../../acl/web_acl"
 
   vpc_id = var.vpc_id
-  subnet_ids = aws_subnet.public_subnets.*.id
+  subnet_ids = aws_subnet.public_subnets[*].id
   tags = merge(var.tags, {Name = "web_acl"})
 }
 

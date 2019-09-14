@@ -1,5 +1,5 @@
 output "ids" {
-  value = aws_subnet.private_subnets.*.id
+  value = aws_subnet.private_subnets[*].id
 }
 
 output "db_sg_id" {

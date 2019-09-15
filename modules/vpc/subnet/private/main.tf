@@ -12,13 +12,6 @@ resource "aws_subnet" "private_subnets" {
   tags = var.tags
 }
 
-module "db_sg" {
-  source = "../../security_group/db"
-
-  vpc_id = var.vpc_id
-  tags = var.tags
-}
-
 resource "aws_route_table" "private_route_table" {
   count = length(aws_subnet.private_subnets)
 

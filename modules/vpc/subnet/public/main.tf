@@ -58,24 +58,11 @@ resource "aws_nat_gateway" "gws" {
   subnet_id = aws_subnet.public_subnets[count.index].id
 }
 
-module "bastion_sg" {
-  source = "../../security_group/bastion"
-
-  vpc_id = var.vpc_id
-  tags = var.tags
-}
-
-resource "aws_instance" "bastion" {
-  count = length(aws_subnet.public_subnets)
-
-  ami = "ami-0bbc25e23a7640b9b"
-  instance_type = "t2.micro"
-  associate_public_ip_address = true
-
-  subnet_id = aws_subnet.public_subnets[count.index].id
-  vpc_security_group_ids = [module.bastion_sg.id]
-
-  key_name = var.key_name
-
-  tags = merge(var.tags, {Name = "bastion host"})
-}
+//module "bastion_host" {
+//  source = "../../../ec2/bastion"
+//
+//  vpc_id = var.vpc_id
+//  public_subnet_ids = aws_subnet.public_subnets[*].id
+//  key_name = var.key_name
+//  tags = var.tags
+//}
